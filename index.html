@@ -3,29 +3,71 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Simon</title>
+  <title>Bachicha dice</title>
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
 </head>
 
 <body>
-  <h1 id="level-title">Presiona una tecla para comenzar :)</h1>
-  <div class="container">
-
-    <div class="row">
-
-      <div type="button" id="green" class="btn green"></div>
-      <div type="button" id="red" class="btn red"></div>
-
-    </div>
-    <div class="row">
-
-      <div type="button" id="yellow" class="btn yellow"></div>
-      <div type="button" id="blue" class="btn blue"></div>
-
-    </div>
+  <div id="cookie-banner">
+    Si quieres guardar tu mejor puntaje necesitamos el uso de cookies ¿Te parece? :)
+    <button id="accept-cookies">Aceptar</button>
+    <button id="reject-cookies">Rechazar</button>
   </div>
 
+  <h1 class="level-title">¡Bachicha dice!</h1>
+  <h2 >Presiona una tecla para comenzar :)</h2>
+
+  <div style="margin: 20px; text-align: center;">
+    <label for="volumen" class="volumen">🔊 Volumen</label>
+    <input id="volumen" type="range" min="0" max="1" step="0.01" value="0.7">
+  </div>
+
+  <div class="contenido-central">
+    <div class="reglas">
+      <h3>Reglas</h3>
+      <ul>
+        <li>En cada nivel, primero se mostrará un patrón, el cual el jugador debe repetir para poder avanzar al siguiente nivel.</li>
+        <li>En los niveles se mantendrá el patrón del nivel anterior y se agregará un nuevo color que el jugador debe recordar.</li>
+        <li>Se puede jugar haciendo click en los botones de colores o con las teclas marcadas en cada botón.</li>
+        <li>¡Ojo! mientras se muestra el patrón se puede comenzar a marcar la secuencia, por lo que si te equivocas por apurado PUEDES PERDER.</li>
+      </ul>
+    </div>
+    <div class="container">
+
+      <div class="row">
+        <div class="espacio-boton">
+          <div type="button" id="green" class="btn green">Q</div>
+        </div>
+        <div class="espacio-boton">
+          <div type="button" id="red" class="btn red">W</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="espacio-boton">
+          <div type="button" id="yellow" class="btn yellow">A</div>
+        </div>
+        <div class="espacio-boton">
+          <div type="button" id="blue" class="btn blue">S</div>
+        </div>
+
+      </div>
+
+    </div>
+    <div class="puntajes">
+      <h3>Puntajes</h3>
+      <div class="puntaje">
+        <h4>Máximo Local</h4>
+        <p class="maximo-local">Nivel 0</p>
+      </div>
+      <div class="puntaje">
+        <h4>Máximo Actual</h4>
+        <p class="maximo-actual">Nivel 0</p>
+      </div>
+    </div>
+  </div>
+  
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="./game.js" charset="utf-8"></script>
 </body>
