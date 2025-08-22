@@ -2,39 +2,105 @@
 let nivel;
 let patronPartida;
 let patronUsuarioClicks;
-let botonesColores = ["red", "blue", "green", "yellow"];
-let flagPrimeraTecla = false;
 let rondaClickUsuario;
+let userChosenColour;
+let botonesColores = ["red", "blue", "green", "yellow"];
+let teclasJugables = ["q", "w", "a", "s"];
+let flagPrimeraTecla = false;
+let flagUsuarioFallo = false;
+let flagCookiesAutorizadas = false;
+let volumenActual = 0.7;
+let puntajeMaximoActual = 0;
+let puntajeMaximoLocal = 0;
 
+let teclaAColor = {
+    q: "green",
+    w: "red",
+    a: "yellow",
+    s: "blue"
+}
+
+
+$(document).ready(function () {
+  // Mostrar el banner si el usuario no ha dado respuesta
+  if (!localStorage.getItem("cookiesDecision")) {
+    $("#cookie-banner").show();
+  } else {
+    $("#cookie-banner").hide();
+    flagCookiesAutorizadas = localStorage.getItem("cookiesDecision") === "accepted";
+    if (flagCookiesAutorizadas) {
+      const puntajeGuardado = getCookie("puntajeMaximoLocal");
+      if (puntajeGuardado) {
+        puntajeMaximoLocal = parseInt(puntajeGuardado, 10);
+        $(".maximo-local").text("Nivel " + puntajeMaximoLocal);
+      }
+    }
+  }
+
+
+  // Aceptar cookies
+  $("#accept-cookies").on("click", function () {
+    flagCookiesAutorizadas = true;
+    localStorage.setItem("cookiesDecision", "accepted");
+    $("#cookie-banner").hide();
+  });
+
+  // Rechazar cookies
+  $("#reject-cookies").on("click", function () {
+    flagCookiesAutorizadas = false;
+    localStorage.setItem("cookiesDecision", "rejected");
+    $("#cookie-banner").hide();
+  });
+});
+
+
+$("#volumen").on("input", function () {
+  volumenActual = parseFloat($(this).val());
+});
 
 // Presionar una tecla para comenzar el juego
 $(document).keydown(function (e) {
     if (flagPrimeraTecla == false) {
         flagPrimeraTecla = true;
         comenzarJuego();
-        nextSequence();
+        setTimeout(function (){
+            nextSequence();
+        }, 600);
+    }
+    else{
+        if (teclasJugables.includes(e.key)) {
+            userChosenColour = teclaAColor[e.key];
+            seleccionUsuario(userChosenColour);
+        }
     }
 });
 
 
 $(".btn").click(function (e) {
     if (flagPrimeraTecla) {
-        let userChosenColour = e.target.id;
-        animacionBoton(userChosenColour);
-        ejecutarSonido(userChosenColour);
-        patronUsuarioClicks.push(userChosenColour);
-        corroborarSeleccion(userChosenColour, patronPartida[rondaClickUsuario]);
+        userChosenColour = e.target.id;
+        seleccionUsuario(userChosenColour);
     }
 });
+
+
+function seleccionUsuario(color){
+    animacionBoton(color);
+    ejecutarSonido(color);
+    patronUsuarioClicks.push(color);
+    corroborarSeleccion(color, patronPartida[rondaClickUsuario]);
+}
 
 
 // Comenzar un nuevo juego
 function comenzarJuego() {
     nivel = 0;
     patronPartida = [];
+    flagUsuarioFallo = false;
     if ($("body").hasClass("game-over")) {
         $("body").removeClass("game-over");
     }
+    $("h2").addClass("escondido");
 }
 
 
@@ -54,13 +120,18 @@ async function mostrarPatronRonda() {
     let idSeleccionado;
 
     for (let j = 0; j < patronPartida.length; j++) {
+
+        if (flagUsuarioFallo) {
+            return;
+        }
+
         colorRonda = patronPartida[j];
 
         idSeleccionado = "#" + colorRonda;
         $(idSeleccionado).fadeIn(100).fadeOut(100).fadeIn(100);
         ejecutarSonido(colorRonda);
 
-        await new Promise(resolve => setTimeout(resolve, 410))
+        await new Promise(resolve => setTimeout(resolve, 480))
     }
 }
 
@@ -69,6 +140,7 @@ async function mostrarPatronRonda() {
 function ejecutarSonido(nombreSonido) {
     let archivo = "./sounds/" + nombreSonido + ".mp3";
     let sonido = new Audio(archivo);
+    sonido.volume = volumenActual;
     sonido.play();
 }
 
@@ -92,9 +164,13 @@ function corroborarSeleccion(seleccionado, objetivo) {
     rondaClickUsuario++;
     if (rondaClickUsuario == patronPartida.length)
     {
+        if (nivel > puntajeMaximoActual) {
+            puntajeMaximoActual = nivel;
+            $(".maximo-actual").text("Nivel " + puntajeMaximoActual);
+        }
         setTimeout(function (){
         nextSequence();
-        }, 500);
+        }, 700);
     }
 }
 
@@ -115,8 +191,44 @@ function aumentarNivel() {
 
 
 function terminarJuego(){
+    flagUsuarioFallo = true;
     ejecutarSonido("wrong");
     $("body").addClass("game-over");
-    $("h1").text("Perdiste, Presiona una tecla para comenzar de nuevo :)");
+    $("h1").text("Perdiste :(");
+    $("h2").removeClass("escondido");
+    actualizarMaximoLocal();
     flagPrimeraTecla = false;
+}
+
+function actualizarMaximoLocal() {
+    if (puntajeMaximoActual > puntajeMaximoLocal) {
+        puntajeMaximoLocal = puntajeMaximoActual;
+        $(".maximo-local").text("Nivel " + puntajeMaximoLocal);
+        if (flagCookiesAutorizadas) {
+            setCookie("puntajeMaximoLocal", puntajeMaximoLocal, 30);
+        }
+    }
+}
+
+
+function setCookie(nombreCookie, valor, dias) {
+  const fechaExpiracion = new Date();
+  fechaExpiracion.setTime(fechaExpiracion.getTime() + dias * 24 * 60 * 60 * 1000);
+  document.cookie = `${nombreCookie}=${valor};expires=${fechaExpiracion.toUTCString()};path=/`;
+}
+
+
+function getCookie(nombre) {
+  const nombreCookie = nombre + "=";
+  const cookiesDecodificadas = decodeURIComponent(document.cookie);
+  const listaCookies = cookiesDecodificadas.split(";");
+  for (let cookie of listaCookies) {
+    // limpieza espacios iniciales tras ;
+    while (cookie.charAt(0) === " ") cookie = cookie.substring(1);
+    // revision cookie comience por nombre buscado
+    if (cookie.indexOf(nombreCookie) === 0) {
+      return cookie.substring(nombreCookie.length, cookie.length);
+    }
+  }
+  return null;
 }
