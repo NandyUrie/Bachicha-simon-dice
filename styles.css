@@ -78,6 +78,11 @@ li {
   font-size: 3rem;
   width: 70%;
   aspect-ratio: 1/1;
+  text-shadow:
+    2px  2px 0 black,
+    -2px -2px 0 black,
+    2px -2px 0 black,
+    -2px 2px 0 black;
 }
 
 .puntajes {
