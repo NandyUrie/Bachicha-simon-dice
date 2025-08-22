@@ -58,6 +58,18 @@ $("#volumen").on("input", function () {
   volumenActual = parseFloat($(this).val());
 });
 
+
+// Hacer click para comenzar el juego
+$(document).on("click", function() {
+    if (flagPrimeraTecla == false) {
+        flagPrimeraTecla = true;
+        comenzarJuego();
+        setTimeout(function (){
+            nextSequence();
+        }, 600);
+    }
+});
+
 // Presionar una tecla para comenzar el juego
 $(document).keydown(function (e) {
     if (flagPrimeraTecla == false) {
@@ -100,6 +112,7 @@ function comenzarJuego() {
     if ($("body").hasClass("game-over")) {
         $("body").removeClass("game-over");
     }
+    $("h1").text("Nivel ");
     $("h2").addClass("escondido");
 }
 
@@ -197,7 +210,9 @@ function terminarJuego(){
     $("h1").text("Perdiste :(");
     $("h2").removeClass("escondido");
     actualizarMaximoLocal();
-    flagPrimeraTecla = false;
+    setTimeout(function() {
+        flagPrimeraTecla = false;
+    }, 500);
 }
 
 function actualizarMaximoLocal() {
